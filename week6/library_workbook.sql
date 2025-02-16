@@ -102,7 +102,9 @@ VALUES
 ( 'Grace'
 , 'Lane' ),
 ( 'Charlie'
-, 'Gray' );
+, 'Gray' ),
+( 'Hyrum'
+, 'Hansen');
 
 INSERT INTO book
 ( book_title
@@ -170,19 +172,19 @@ INSERT INTO stock
 VALUES
 ( (SELECT book_id FROM book WHERE book_title = 'The Great Escape')
 , (SELECT location_id FROM location WHERE location_name = 'Rexburg General Library')
-, 50
+, 75
 ),
 ( (SELECT book_id FROM book WHERE book_title = 'Journey Through Time')
 , (SELECT location_id FROM location WHERE location_name = 'Rexburg General Library')
-, 50
+, 17
 ),
 ( (SELECT book_id FROM book WHERE book_title = 'Mastering Cooking Basics')
 , (SELECT location_id FROM location WHERE location_name = 'Rexburg General Library')
-, 50
+, 56
 ),
 ( (SELECT book_id FROM book WHERE book_title = 'Mysteries of the Ocean')
 , (SELECT location_id FROM location WHERE location_name = 'Rexburg General Library')
-, 50
+, 69
 ),
 ( (SELECT book_id FROM book WHERE book_title = 'Advanced Robotics')
 , (SELECT location_id FROM location WHERE location_name = 'Rexburg General Library')
@@ -558,7 +560,89 @@ SELECT * FROM stock;
 --    haven't been checked out yet.
 -- -----------------------------------------------------------
 -- -----------------------------------------------------------
+START TRANSACTION;
 
+SAVEPOINT borrow13;
+
+INSERT INTO borrow
+( book_id
+, person_id
+, borrow_date
+, due_date
+, return_date )
+VALUES
+( (SELECT book_id FROM book WHERE book_title = 'The Ancient Ruins')
+, (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen')
+, '2025-2-12'
+, '2025-2-28'
+, NULL
+);
+
+UPDATE stock
+SET stock_quantity = stock_quantity - 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'The Ancient Ruins');
+
+-- Rollback to savpoint13
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
+
+START TRANSACTION;
+
+SAVEPOINT borrow14;
+
+INSERT INTO borrow
+( book_id
+, person_id
+, borrow_date
+, due_date
+, return_date )
+VALUES
+( (SELECT book_id FROM book WHERE book_title = 'Digital Marketing Essentials')
+, (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen')
+, '2025-2-12'
+, '2025-2-28'
+, NULL
+);
+
+UPDATE stock
+SET stock_quantity = stock_quantity - 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Digital Marketing Essentials');
+
+-- Rollback to savpoint14
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
+
+START TRANSACTION;
+
+SAVEPOINT borrow15;
+
+INSERT INTO borrow
+( book_id
+, person_id
+, borrow_date
+, due_date
+, return_date )
+VALUES
+( (SELECT book_id FROM book WHERE book_title = 'Shadows of the Night')
+, (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen')
+, '2025-2-12'
+, '2025-2-28'
+, NULL
+);
+
+UPDATE stock
+SET stock_quantity = stock_quantity - 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Shadows of the Night');
+
+-- Rollback to savpoint15
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
 -- -----------------------------------------------------------
 -- These Transactions happened when the books were returned
 -- -----------------------------------------------------------
@@ -606,3 +690,59 @@ SELECT * FROM stock;
 -- you previously checked out
 -- -----------------------------------------------------------
 -- -----------------------------------------------------------
+START TRANSACTION;
+
+SAVEPOINT return3;
+
+UPDATE borrow
+SET return_date = '2025-2-28'
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'The Ancient Ruins')
+AND   person_id = (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen');
+
+UPDATE stock
+SET stock_quantity = stock_quantity + 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'The Ancient Ruins');
+
+-- ROLLBACK TO SAVEPOINT return3;
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
+
+START TRANSACTION;
+
+SAVEPOINT return4;
+
+UPDATE borrow
+SET return_date = '2025-2-28'
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Digital Marketing Essentials')
+AND   person_id = (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen');
+
+UPDATE stock
+SET stock_quantity = stock_quantity + 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Digital Marketing Essentials');
+
+-- ROLLBACK TO SAVEPOINT return4;
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
+
+START TRANSACTION;
+
+SAVEPOINT return5;
+
+UPDATE borrow
+SET return_date = '2025-2-28'
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Shadows of the Night')
+AND   person_id = (SELECT person_id FROM person WHERE CONCAT(person_fname, ' ', person_lname) = 'Hyrum Hansen');
+
+UPDATE stock
+SET stock_quantity = stock_quantity + 1
+WHERE book_id = (SELECT book_id FROM book WHERE book_title = 'Shadows of the Night');
+
+-- ROLLBACK TO SAVEPOINT return5;
+COMMIT;
+
+SELECT * FROM borrow;
+SELECT * FROM stock;
