@@ -206,6 +206,8 @@ ORDER by title;
 --    1 row in set (0.06 sec)
 -- ------------------------------------------------------------------------------------------
 
+SELECT COUNT(*) AS "Total Films"
+FROM film;
 
 -- ------------------------------------------------------------------------------------------
 -- 2. Calculate the average rental duration for all films.
@@ -218,6 +220,8 @@ ORDER by title;
 --    1 row in set (0.00 sec)
 -- ------------------------------------------------------------------------------------------
 
+SELECT AVG(f.rental_duration) AS "Average Rental Duration"
+FROM film f;
 
 -- ------------------------------------------------------------------------------------------
 -- 3. Find the total number of films for each rating.
@@ -234,6 +238,10 @@ ORDER by title;
 --    5 rows in set (0.00 sec)
 -- ------------------------------------------------------------------------------------------
 
+SELECT f.rating AS "Rating",
+	COUNT(*) AS "Total Films"
+FROM film f
+GROUP BY f.rating;
 
 -- ------------------------------------------------------------------------------------------
 -- 4. List the total number of films by category that has more than 50 films.
@@ -262,6 +270,13 @@ ORDER by title;
 --    16 rows in set (0.02 sec)
 -- ------------------------------------------------------------------------------------------
 
+SELECT c.name AS "Category Name",
+	COUNT(*) AS "Total Films"
+FROM film_category fc
+	JOIN category c ON fc.category_id = c.category_id
+GROUP BY c.name
+HAVING COUNT(*) > 50
+ORDER BY COUNT(*) DESC;
 
 -- ------------------------------------------------------------------------------------------
 -- 5. For each store, calculate the total rental revenue (amount) grouped by the store's ID.
@@ -278,3 +293,12 @@ ORDER by title;
 --    2 rows in set (0.19 sec)
 -- ------------------------------------------------------------------------------------------
 
+SELECT s.store_id AS "Store ID",
+	CONCAT("$", FORMAT(SUM(p.amount), 2))AS "Total Revenue"
+FROM rental r
+	JOIN inventory i ON r.inventory_id = i.inventory_id
+    JOIN store s ON i.store_id = s.store_id
+    JOIN payment p ON p.rental_id = r.rental_id
+GROUP BY s.store_id
+HAVING SUM(p.amount) > 15000
+ORDER BY SUM(p.amount) DESC;	
